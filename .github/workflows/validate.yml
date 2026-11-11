@@ -1,0 +1,34 @@
+# Checks the marketplace and every plugin the way Claude Code loads them, and that the report summary still reads
+# the JSON both packages write today.
+name: Validate
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install -g @anthropic-ai/claude-code
+      - run: claude plugin validate . --strict
+      - name: Validate every plugin
+        run: for p in plugins/*/; do claude plugin validate "$p" --strict; done
+      # site-audit: the report summary still reads the JSON both packages write today.
+      - name: site-audit summarizes real reports
+        run: |
+          mkdir -p reports
+          cat > reports/index.html <<'HTML'
+          <!doctype html><html lang="en"><head><meta charset="utf-8"><title>Example page for the audit</title></head>
+          <body><main><h1>Example page for the audit</h1><p>Some text for the audit to read.</p></main></body></html>
+          HTML
+          npx --yes serve reports -l 3456 >/dev/null 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3456/ >/dev/null && break; sleep 1; done
+          npx --yes search-auditor@latest http://127.0.0.1:3456 --json --out seo.json --fail-on never >/dev/null
+          npx --yes ai-search-auditor@latest http://127.0.0.1:3456 --json --out geo.json --fail-on never >/dev/null
+          node plugins/site-audit/scripts/summarize.mjs seo.json --all
+          node plugins/site-audit/scripts/summarize.mjs geo.json --all
