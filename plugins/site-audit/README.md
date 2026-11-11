@@ -10,7 +10,7 @@ You don't have to type the commands: ask Claude for an SEO audit, an AI search a
 ## Install
 
 ```
-/plugin marketplace add a-bibikov/claude-plugins
+/plugin marketplace add a-bibikov/agent-plugins
 /plugin install site-audit@albibikov
 ```
 

@@ -1,9 +1,9 @@
-# claude-plugins
+# agent-plugins
 
 [Claude Code](https://code.claude.com) plugins by [Aleksandr Bibikov](https://albibikov.com). Add the marketplace once, then install any plugin from it:
 
 ```
-/plugin marketplace add a-bibikov/claude-plugins
+/plugin marketplace add a-bibikov/agent-plugins
 /plugin install site-audit@albibikov
 ```
 

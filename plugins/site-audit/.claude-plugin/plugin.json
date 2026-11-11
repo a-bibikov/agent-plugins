@@ -7,8 +7,8 @@
     "name": "Aleksandr Bibikov",
     "url": "https://albibikov.com"
   },
-  "homepage": "https://github.com/a-bibikov/claude-plugins/tree/main/plugins/site-audit",
-  "repository": "https://github.com/a-bibikov/claude-plugins",
+  "homepage": "https://github.com/a-bibikov/agent-plugins/tree/main/plugins/site-audit",
+  "repository": "https://github.com/a-bibikov/agent-plugins",
   "license": "MIT",
   "keywords": [
     "seo",
