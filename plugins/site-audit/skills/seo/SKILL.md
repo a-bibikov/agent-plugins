@@ -1,5 +1,6 @@
 ---
 description: Audits a website for classic search (Google, Bing, Yandex) with search-auditor — indexing, robots.txt, redirects, canonical, sitemap, titles and descriptions, headings, broken links, images, structured data, hreflang, HTTPS — then fixes what it finds in the site's code and runs the audit again. Use when asked for an SEO audit, technical SEO, why pages are not indexed, or to check a site before a release.
+allowed-tools: Bash(npx --yes search-auditor@latest *), Bash(node *scripts/serve.mjs*), Bash(node *scripts/summarize.mjs*), Bash(npm run build), Bash(mkdir -p *)
 ---
 
 # SEO audit with search-auditor
@@ -13,12 +14,18 @@ For AI search (ChatGPT, Claude, Perplexity, llms.txt) use the `geo` skill of thi
 - **A live site** — the user gives a URL, or the project's site is deployed: audit the URL.
 - **This project, not deployed yet or with unreleased changes** — build it and audit the local production build, with `--base` set to the public origin so the report shows public addresses. Use the production build, not the dev server: dev servers add scripts and skip optimizations.
 
-  Typical commands, from `package.json` scripts:
-  - Next.js: `npm run build && npx next start -p 3456`
-  - Astro, Vite, Eleventy and other static sites: `npm run build && npx --yes serve <out dir> -l 3456` (`dist`, `out`, `_site`, `build`)
+  Typical commands (run each as its own command), from `package.json` scripts:
+  - Next.js: `npm run build`, then `npx next start -p 3456`
+  - Astro, Vite, Eleventy and other static sites: `npm run build`, then `npx --yes serve <out dir> -l 3456` (`dist`, `out`, `_site`, `build`)
   - Anything else: the project's own `build` and `start`
 
-  Start the server in the background, wait until `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3456/` answers 200, and stop it when you are done.
+  Start it with the plugin's script: one command that runs the server in the background, waits until it answers and prints `ready`. Do not write shell loops with `curl` and `sleep`: Claude Code's permission checks refuse them.
+
+  ```bash
+  node "${CLAUDE_PLUGIN_ROOT}/scripts/serve.mjs" start --port 3456 -- npx next start -p 3456
+  ```
+
+  Environment variables go after `--` as usual (`-- NEXT_PUBLIC_SITE_URL=https://example.com npx next start -p 3456`). If it prints the end of the server log instead of `ready`, the server failed: fix that first. When you are done: `node "${CLAUDE_PLUGIN_ROOT}/scripts/serve.mjs" stop --port 3456`.
 
 If you do not know the public origin, ask; without `--base` sitemap and canonical checks compare against the wrong host.
 
@@ -26,15 +33,17 @@ If you do not know the public origin, ask; without `--base` sitemap and canonica
 
 Requires Node.js 22.18 or newer and access to the npm registry. If either is missing, say so and stop instead of guessing.
 
+Run these as three separate commands, not joined with `;` or `&&`:
+
 ```bash
-out="${TMPDIR:-/tmp}/site-audit"; mkdir -p "$out"
-npx --yes search-auditor@latest <url> [--base https://example.com] --pages 20 --json --out "$out/seo.json" --fail-on never > /dev/null
-node "${CLAUDE_PLUGIN_ROOT}/scripts/summarize.mjs" "$out/seo.json" --all
+mkdir -p "${TMPDIR:-/tmp}/site-audit"
+npx --yes search-auditor@latest <url> [--base https://example.com] --pages 20 --json --out "${TMPDIR:-/tmp}/site-audit/seo.json" --fail-on never > /dev/null
+node "${CLAUDE_PLUGIN_ROOT}/scripts/summarize.mjs" "${TMPDIR:-/tmp}/site-audit/seo.json" --all
 ```
 
 - `--pages all` audits every page in the sitemap; use it for small sites or when the user asks for everything. The default samples 20 pages across templates.
 - `--lang ru` writes the report in Russian when the user writes in Russian; check IDs stay the same.
-- Read the summary, not the raw JSON: the file is large. Open `$out/seo.json` only for a detail the summary leaves out (`findings[]` has `rule`, `level`, `where`, `message`, `why`, `fix`; `rules[]` has every check with its `status`).
+- Read the summary, not the raw JSON: the file is large. Open `${TMPDIR:-/tmp}/site-audit/seo.json` only for a detail the summary leaves out (`findings[]` has `rule`, `level`, `where`, `message`, `why`, `fix`; `rules[]` has every check with its `status`).
 
 ## 3. Fix
 

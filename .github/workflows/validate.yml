@@ -26,9 +26,9 @@ jobs:
           <!doctype html><html lang="en"><head><meta charset="utf-8"><title>Example page for the audit</title></head>
           <body><main><h1>Example page for the audit</h1><p>Some text for the audit to read.</p></main></body></html>
           HTML
-          npx --yes serve reports -l 3456 >/dev/null 2>&1 &
-          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3456/ >/dev/null && break; sleep 1; done
+          node plugins/site-audit/scripts/serve.mjs start --port 3456 -- npx --yes serve reports -l 3456
           npx --yes search-auditor@latest http://127.0.0.1:3456 --json --out seo.json --fail-on never >/dev/null
           npx --yes ai-search-auditor@latest http://127.0.0.1:3456 --json --out geo.json --fail-on never >/dev/null
           node plugins/site-audit/scripts/summarize.mjs seo.json --all
           node plugins/site-audit/scripts/summarize.mjs geo.json --all
+          node plugins/site-audit/scripts/serve.mjs stop --port 3456

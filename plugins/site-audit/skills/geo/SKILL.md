@@ -1,5 +1,6 @@
 ---
 description: Audits a website for AI search (ChatGPT, Claude, Perplexity, Gemini, Google AI Overviews) with ai-search-auditor — AI agents in robots.txt, text without JavaScript, who stands behind the site in JSON-LD, answer-first articles, llms.txt, freshness, prompt injection — then fixes what it finds in the site's code and runs the audit again. Use when asked for a GEO, AEO or AI SEO audit, about llms.txt, or why a site is not cited by AI assistants.
+allowed-tools: Bash(npx --yes ai-search-auditor@latest *), Bash(node *scripts/serve.mjs*), Bash(node *scripts/summarize.mjs*), Bash(npm run build), Bash(mkdir -p *)
 ---
 
 # AI search audit with ai-search-auditor
@@ -13,12 +14,18 @@ For classic search (Google, Bing, Yandex indexing) use the `seo` skill of this p
 - **A live site** — the user gives a URL, or the project's site is deployed: audit the URL.
 - **This project, not deployed yet or with unreleased changes** — build it and audit the local production build, with `--base` set to the public origin so the report shows public addresses. Use the production build, not the dev server.
 
-  Typical commands, from `package.json` scripts:
-  - Next.js: `npm run build && npx next start -p 3456`
-  - Astro, Vite, Eleventy and other static sites: `npm run build && npx --yes serve <out dir> -l 3456`
+  Typical commands (run each as its own command), from `package.json` scripts:
+  - Next.js: `npm run build`, then `npx next start -p 3456`
+  - Astro, Vite, Eleventy and other static sites: `npm run build`, then `npx --yes serve <out dir> -l 3456`
   - Anything else: the project's own `build` and `start`
 
-  Start the server in the background, wait until `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3456/` answers 200, and stop it when you are done.
+  Start it with the plugin's script: one command that runs the server in the background, waits until it answers and prints `ready`. Do not write shell loops with `curl` and `sleep`: Claude Code's permission checks refuse them.
+
+  ```bash
+  node "${CLAUDE_PLUGIN_ROOT}/scripts/serve.mjs" start --port 3456 -- npx next start -p 3456
+  ```
+
+  Environment variables go after `--` as usual (`-- NEXT_PUBLIC_SITE_URL=https://example.com npx next start -p 3456`). If it prints the end of the server log instead of `ready`, the server failed: fix that first. When you are done: `node "${CLAUDE_PLUGIN_ROOT}/scripts/serve.mjs" stop --port 3456`.
 
 A local build cannot show what a CDN or bot protection does to real AI agents (check BOT-3 on the live site).
 
@@ -26,15 +33,17 @@ A local build cannot show what a CDN or bot protection does to real AI agents (c
 
 Requires Node.js 22.18 or newer and access to the npm registry. If either is missing, say so and stop instead of guessing.
 
+Run these as three separate commands, not joined with `;` or `&&`:
+
 ```bash
-out="${TMPDIR:-/tmp}/site-audit"; mkdir -p "$out"
-npx --yes ai-search-auditor@latest <url> [--base https://example.com] --pages 20 --json --out "$out/geo.json" --fail-on never > /dev/null
-node "${CLAUDE_PLUGIN_ROOT}/scripts/summarize.mjs" "$out/geo.json" --all
+mkdir -p "${TMPDIR:-/tmp}/site-audit"
+npx --yes ai-search-auditor@latest <url> [--base https://example.com] --pages 20 --json --out "${TMPDIR:-/tmp}/site-audit/geo.json" --fail-on never > /dev/null
+node "${CLAUDE_PLUGIN_ROOT}/scripts/summarize.mjs" "${TMPDIR:-/tmp}/site-audit/geo.json" --all
 ```
 
 - `--pages all` audits every page in the sitemap. `--lang ru` writes the report in Russian.
-- To check only llms.txt and llms-full.txt: `npx --yes ai-search-auditor@latest llms-txt <url> --json --out "$out/llms.json"`.
-- Read the summary, not the raw JSON. Open `$out/geo.json` only for a detail the summary leaves out.
+- To check only llms.txt and llms-full.txt: `npx --yes ai-search-auditor@latest llms-txt <url> --json --out "${TMPDIR:-/tmp}/site-audit/llms.json"`.
+- Read the summary, not the raw JSON. Open `${TMPDIR:-/tmp}/site-audit/geo.json` only for a detail the summary leaves out.
 
 ## 3. Fix
 

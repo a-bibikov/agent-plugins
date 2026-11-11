@@ -29,6 +29,7 @@ Needs Node.js 22.18+ and access to the npm registry: the skills run the packages
 .claude-plugin/plugin.json
 skills/seo/SKILL.md, fixes.md     classic search: how to run, where each group is fixed
 skills/geo/SKILL.md, fixes.md     AI search
+scripts/serve.mjs                 starts a local build in the background and waits until it answers
 scripts/summarize.mjs             a JSON report → a short list to work from
 ```
 
