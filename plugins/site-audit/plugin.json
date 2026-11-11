@@ -1,0 +1,40 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "site-audit",
+  "version": "0.3.0",
+  "description": "Audit a site for classic search and AI search with search-auditor and ai-search-auditor and get a report of what to fix, where and why. Read-only: it never changes your code.",
+  "author": {
+    "name": "Aleksandr Bibikov",
+    "url": "https://albibikov.com"
+  },
+  "homepage": "https://github.com/a-bibikov/agent-plugins/tree/main/plugins/site-audit",
+  "repository": "https://github.com/a-bibikov/agent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "seo",
+    "technical-seo",
+    "geo",
+    "ai-search",
+    "llms-txt",
+    "json-ld",
+    "robots-txt",
+    "sitemap",
+    "audit"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Site audit: SEO and AI search",
+        "shortDescription": "SEO and AI search audits that report what to fix, where and why",
+        "developerName": "Aleksandr Bibikov",
+        "category": "Coding",
+        "websiteURL": "https://github.com/a-bibikov/agent-plugins/tree/main/plugins/site-audit",
+        "defaultPrompt": [
+          "Run an SEO audit of this site",
+          "Why does ChatGPT not cite my site?",
+          "Check the site for AI search before release"
+        ]
+      }
+    }
+  }
+}

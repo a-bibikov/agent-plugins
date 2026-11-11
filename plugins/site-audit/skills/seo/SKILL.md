@@ -2,7 +2,7 @@
 name: seo
 description: Runs a technical SEO audit of a website for Google, Bing and Yandex with the search-auditor npm package (80 checks of indexing, robots.txt, redirects, canonical, sitemap, titles and descriptions, headings, broken links, images, structured data, hreflang and HTTPS) and delivers a report of what to fix, where and why. Read-only, it never changes the site's code or data. Use when the user asks for an SEO audit or technical SEO check, asks why pages are not indexed or ranked, or wants to check a site or a build before a release. Not for AI search, llms.txt or why ChatGPT does not cite the site (use the geo skill), not for keyword research, and not for making the fixes.
 license: MIT
-compatibility: Claude Code. Needs Node.js 22.18 or newer and network access to the npm registry and to the audited site.
+compatibility: Claude Code, Codex and other agents that load Agent Skills. Needs Node.js 22.18 or newer and network access to the npm registry and to the audited site.
 allowed-tools: Read, Grep, Glob, Bash(npx --yes search-auditor@latest *), Bash(node *scripts/serve.mjs*), Bash(node *scripts/summarize.mjs*), Bash(npm run build), Bash(mkdir -p *)
 metadata:
   author: Aleksandr Bibikov
@@ -19,7 +19,9 @@ metadata:
 - **If the user asks to fix something, stop the skill first.** Say that the audit is finished and that the fixes are a separate task, and make them only after the user confirms that task outside this skill.
 - **Never invent data.** Report only what the audit found. When a fix needs facts the site does not have (ratings, prices, addresses), say that they are needed, not what they should be.
 - **"Not checked" is not "passed".** HTTPS, certificate, security header and server speed checks need the live site and are skipped on a local build: list them as not checked.
-- **Run every command on its own.** Do not join commands with `;` or `&&`, and do not write shell loops with `curl` and `sleep`: Claude Code's permission checks refuse them. The plugin's scripts do the waiting.
+- **Run every command on its own.** Do not join commands with `;` or `&&`, and do not write shell loops with `curl` and `sleep`: agents' permission checks refuse them. The plugin's scripts do the waiting.
+- **The scripts are in the plugin's `scripts/` folder.** Claude Code writes its path below as `${CLAUDE_PLUGIN_ROOT}/scripts`. If you see `${CLAUDE_PLUGIN_ROOT}` literally, use the absolute path of `../../scripts` relative to this SKILL.md instead.
+- **The audit needs the network.** `npx` downloads the package and the audit requests the site. If a command fails because the sandbox has no network, ask the user to allow network access for it; do not guess the findings.
 
 # Instructions
 
@@ -135,3 +137,5 @@ The audit is done; fixing is a separate task. Say so, and start making changes o
 | Canonical, sitemap or hreflang findings name `127.0.0.1` | `--base` is missing on a local build | rerun with `--base` set to the public origin |
 | Many checks under "Not checked" | a local build, a one-page site, or no sitemap | list which checks need the live site or content the site does not have |
 | A permission prompt or refusal on a command | the command was joined with others or used `curl` and `sleep` | run the commands from this skill one by one, exactly as written |
+| `Cannot find module …/scripts/serve.mjs` | `${CLAUDE_PLUGIN_ROOT}` was not replaced (an agent other than Claude Code) | use the absolute path of `../../scripts` relative to this SKILL.md |
+| `ENOTFOUND registry.npmjs.org` or `EAI_AGAIN` | the agent's sandbox has no network | ask the user to allow network access for the command |

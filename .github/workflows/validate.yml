@@ -1,5 +1,5 @@
-# Checks the marketplace and every plugin the way Claude Code loads them, and that the report summary still reads
-# the JSON both packages write today.
+# Checks the marketplaces and every plugin the way Claude Code and Codex load them, that both sets of manifests agree,
+# and that the report summary still reads the JSON both packages write today.
 name: Validate
 on:
   push:
@@ -14,11 +14,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm install -g @anthropic-ai/claude-code
+      - name: The Claude Code and Codex manifests agree
+        run: node scripts/check-manifests.mjs
+      - run: npm install -g @anthropic-ai/claude-code @openai/codex
       - run: claude plugin validate . --strict
       - name: Validate every plugin
         run: for p in plugins/*/; do claude plugin validate "$p" --strict; done
-      # site-audit: the report summary still reads the JSON both packages write today.
+      - name: Codex installs every plugin with its skills
+        env:
+          CODEX_HOME: ${{ runner.temp }}/codex
+        run: |
+          mkdir -p "$CODEX_HOME"
+          codex plugin marketplace add "$PWD"
+          for p in plugins/*/; do
+            name=$(basename "$p")
+            codex plugin add "$name@albibikov"
+            codex plugin list | grep -E "^$name@albibikov +installed"
+            for s in "$p"skills/*/; do test -f "$CODEX_HOME/plugins/cache/albibikov/$name/"*/skills/$(basename "$s")/SKILL.md; done
+          done
+      # site-audit: the server script starts and stops a site, and the report summary still reads the JSON both packages
+      # write today.
       - name: site-audit summarizes real reports
         run: |
           mkdir -p reports
