@@ -11,7 +11,7 @@
 
 | Plugin | What it does |
 |---|---|
-| [site-audit](plugins/site-audit) | Audits a site for classic search ([search-auditor](https://github.com/a-bibikov/search-auditor)) and AI search ([ai-search-auditor](https://github.com/a-bibikov/ai-search-audit)), fixes the findings in your code and runs the audit again. Skills: `/site-audit:seo`, `/site-audit:geo` |
+| [site-audit](plugins/site-audit) | Audits a site for classic search ([search-auditor](https://github.com/a-bibikov/search-auditor)) and AI search ([ai-search-auditor](https://github.com/a-bibikov/ai-search-audit)) and reports what to fix, where and why. Read-only. Skills: `/site-audit:seo`, `/site-audit:geo` |
 
 ## Adding a plugin
 

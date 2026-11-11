@@ -1,6 +1,6 @@
 {
   "name": "albibikov",
-  "description": "Claude Code plugins by Aleksandr Bibikov: SEO and AI search (GEO) audits that fix what they find in your code.",
+  "description": "Claude Code plugins by Aleksandr Bibikov: SEO and AI search (GEO) audits that report what to fix, where and why.",
   "owner": {
     "name": "Aleksandr Bibikov",
     "url": "https://albibikov.com"
@@ -9,7 +9,7 @@
     {
       "name": "site-audit",
       "source": "./plugins/site-audit",
-      "description": "Audit a site for classic search (search-auditor) and AI search (ai-search-auditor), fix the findings in the code, run the audit again.",
+      "description": "Audit a site for classic search (search-auditor) and AI search (ai-search-auditor) and get a report of what to fix, where and why. Read-only: it never changes your code.",
       "category": "web",
       "tags": [
         "seo",
